@@ -8,8 +8,19 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
-// get git info from command line
-const _COMMIT_HASH = child_process.execSync('git rev-parse --short HEAD').toString().trim();
+function resolveCommit() {
+  if (process.env.GIT_SHA) return process.env.GIT_SHA;
+  if (process.env.VUE_APP_GIT_SHA) return process.env.VUE_APP_GIT_SHA;
+  try {
+    return child_process
+      .execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch (e) {
+    return 'nogit';
+  }
+}
+const _COMMIT_HASH = resolveCommit();
 console.info('Commit hash:', _COMMIT_HASH);
 
 export default {
